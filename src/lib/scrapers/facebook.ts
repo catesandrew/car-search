@@ -80,26 +80,31 @@ export async function searchFacebook(config: SearchConfig): Promise<NewListing[]
             ? parsed
             : (parsed.listings ?? parsed.results ?? []);
 
-          const normalized: NewListing[] = rawListings.map((raw) => ({
-            vin: null,
-            externalId: String(raw.listing_url ?? raw.url ?? ''),
-            source: 'facebook',
-            url: String(raw.listing_url ?? raw.url ?? ''),
-            imageUrl: String(raw.image_url ?? raw.image ?? '') || null,
-            year: raw.year ? Number(raw.year) : null,
-            make: String(raw.make ?? '') || null,
-            model: String(raw.model ?? '') || null,
-            trim: null,
-            price: parseFbPrice(raw.price),
-            mileage: typeof raw.mileage === 'number' ? raw.mileage : null,
-            location: String(raw.location ?? '') || null,
-            dealerName: null,
-            dealerType: 'private',
-            oneOwner: false,
-            noAccidents: false,
-            personalUse: false,
-            dealRating: null,
-          }));
+          const normalized: NewListing[] = rawListings.map((raw) => {
+            // Strip tracking params from FB URLs for consistent dedup
+            const fullUrl = String(raw.listing_url ?? raw.url ?? '');
+            const cleanUrl = fullUrl.split('?')[0];
+            return {
+              vin: null,
+              externalId: cleanUrl || fullUrl,
+              source: 'facebook',
+              url: fullUrl,
+              imageUrl: String(raw.image_url ?? raw.image ?? '') || null,
+              year: raw.year ? Number(raw.year) : null,
+              make: String(raw.make ?? '') || null,
+              model: String(raw.model ?? '') || null,
+              trim: null,
+              price: parseFbPrice(raw.price),
+              mileage: typeof raw.mileage === 'number' ? raw.mileage : null,
+              location: String(raw.location ?? '') || null,
+              dealerName: null,
+              dealerType: 'private',
+              oneOwner: false,
+              noAccidents: false,
+              personalUse: false,
+              dealRating: null,
+            };
+          });
 
           // Filter to only configured makes/models — FB returns unrelated results
           const allowedModels = config.makesModels

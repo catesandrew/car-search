@@ -43,11 +43,17 @@ export async function upsertListings(
         if (existing) {
           const priceChanged = listing.price != null && listing.price !== existing.price;
           const needsImage = !existing.imageUrl && listing.imageUrl;
+          const needsPrice = !existing.price && listing.price;
+          const needsMileage = !existing.mileage && listing.mileage;
+          const needsLocation = !existing.location && listing.location;
           db.update(listings)
             .set({
               lastSeenAt: now,
               ...(priceChanged ? { price: listing.price } : {}),
               ...(needsImage ? { imageUrl: listing.imageUrl } : {}),
+              ...(needsPrice ? { price: listing.price } : {}),
+              ...(needsMileage ? { mileage: listing.mileage } : {}),
+              ...(needsLocation ? { location: listing.location } : {}),
             })
             .where(eq(listings.id, existing.id))
             .run();
@@ -75,11 +81,17 @@ export async function upsertListings(
         if (existing) {
           const priceChanged = listing.price != null && listing.price !== existing.price;
           const needsImage = !existing.imageUrl && listing.imageUrl;
+          const needsPrice = !existing.price && listing.price;
+          const needsMileage = !existing.mileage && listing.mileage;
+          const needsLocation = !existing.location && listing.location;
           db.update(listings)
             .set({
               lastSeenAt: now,
               ...(priceChanged ? { price: listing.price } : {}),
               ...(needsImage ? { imageUrl: listing.imageUrl } : {}),
+              ...(needsPrice ? { price: listing.price } : {}),
+              ...(needsMileage ? { mileage: listing.mileage } : {}),
+              ...(needsLocation ? { location: listing.location } : {}),
             })
             .where(eq(listings.id, existing.id))
             .run();
