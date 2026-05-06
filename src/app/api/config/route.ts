@@ -55,7 +55,8 @@ export async function PUT(request: NextRequest) {
 
   // Recompute deal scores if priceMax changed
   if (priceMaxChanged && updatedConfig) {
-    recomputeAllScores(db, updatedConfig as unknown as SearchConfig);
+    const recomputed = recomputeAllScores(db, updatedConfig as unknown as SearchConfig);
+    console.log(`[config] Recomputed ${recomputed} deal scores after config change`);
   }
 
   return NextResponse.json(updatedConfig);

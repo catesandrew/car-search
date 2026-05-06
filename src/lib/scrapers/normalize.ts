@@ -113,7 +113,7 @@ export function normalizeMcpListing(raw: Record<string, unknown>): NewListing {
 
   const vin = parseString(raw.vin ?? raw.VIN);
   const externalId = parseString(raw.id ?? raw.listing_id ?? raw.external_id);
-  const source = parseString(raw.source ?? raw.platform) ?? 'mcp';
+  const source = (parseString(raw.source ?? raw.platform) ?? 'mcp').toLowerCase();
   const url = parseString(raw.url ?? raw.listing_url ?? raw.link);
   const imageUrl = parseString(raw.image_url ?? raw.image ?? raw.photo_url ?? raw.thumbnail);
   const trim = parseString(raw.trim ?? raw.trim_level ?? raw.package);

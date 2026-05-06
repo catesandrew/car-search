@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   XCircle,
 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { useListingDetail, useUpdateListing } from '@/hooks/use-listings';
 import { PriceChart } from '@/components/price-chart';
 import { NotesPanel } from '@/components/notes-panel';
@@ -18,6 +19,7 @@ import { DealScoreBadge } from '@/components/deal-score-badge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 function formatPrice(cents: number | null): string {
   if (cents == null) return 'N/A';
@@ -65,9 +67,15 @@ export default function ListingDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { data: listing, isLoading, error } = useListingDetail(Number(id));
+  const listingId = Number(id);
+  const { data: listing, isLoading, error } = useListingDetail(listingId);
   const { mutate: updateListing } = useUpdateListing();
   const [imgError, setImgError] = useState(false);
+  const { data: comps } = useQuery({
+    queryKey: ['comps', listingId],
+    queryFn: () => fetch(`/api/listings/${listingId}/comps`).then(r => r.json()),
+    enabled: !!listing,
+  });
 
   if (isLoading) return <DetailSkeleton />;
 
@@ -269,8 +277,114 @@ export default function ListingDetailPage({
           )}
         </div>
 
-        {/* Price history + Notes */}
+        {/* Market Analysis + Price history + Notes */}
         <div className="flex flex-col gap-4">
+          {/* Market Comparison */}
+          {comps?.hasComps && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm uppercase tracking-wide text-muted-foreground">
+                  Market Analysis
+                </CardTitle>
+                <p className="text-xs text-muted-foreground">
+                  Compared to {comps.compCount} similar {comps.modelKey}s ({comps.yearRange})
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Verdict */}
+                <div className="flex items-center gap-3">
+                  <span className={`text-lg font-bold ${
+                    comps.comparison.verdict.includes('Great') ? 'text-green-600' :
+                    comps.comparison.verdict.includes('Good') ? 'text-green-500' :
+                    comps.comparison.verdict === 'Fair' ? 'text-yellow-600' :
+                    'text-red-500'
+                  }`}>
+                    {comps.comparison.verdict}
+                  </span>
+                  {comps.comparison.priceDeltaPercent !== 0 && (
+                    <span className={`text-sm ${comps.comparison.priceDeltaPercent > 0 ? 'text-green-600' : 'text-red-500'}`}>
+                      {comps.comparison.priceDeltaPercent > 0 ? '↓' : '↑'} {Math.abs(comps.comparison.priceDeltaPercent)}% {comps.comparison.priceDeltaPercent > 0 ? 'below' : 'above'} median
+                    </span>
+                  )}
+                </div>
+
+                {/* Price comparison bar */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Market Price Range</span>
+                    <span>{formatPrice(comps.market.minPrice)} – {formatPrice(comps.market.maxPrice)}</span>
+                  </div>
+                  <div className="relative h-3 bg-muted rounded-full overflow-hidden">
+                    {/* IQR range (25th-75th percentile) */}
+                    <div
+                      className="absolute h-full bg-blue-200 dark:bg-blue-900 rounded-full"
+                      style={{
+                        left: `${((comps.market.p25Price - comps.market.minPrice) / (comps.market.maxPrice - comps.market.minPrice)) * 100}%`,
+                        width: `${((comps.market.p75Price - comps.market.p25Price) / (comps.market.maxPrice - comps.market.minPrice)) * 100}%`,
+                      }}
+                    />
+                    {/* Median marker */}
+                    <div
+                      className="absolute h-full w-0.5 bg-blue-500"
+                      style={{ left: `${((comps.market.medianPrice - comps.market.minPrice) / (comps.market.maxPrice - comps.market.minPrice)) * 100}%` }}
+                    />
+                    {/* This listing's price marker */}
+                    {listing.price != null && (
+                      <div
+                        className="absolute -top-0.5 w-4 h-4 rounded-full border-2 border-white bg-orange-500 shadow"
+                        style={{
+                          left: `${Math.max(0, Math.min(100, ((listing.price - comps.market.minPrice) / (comps.market.maxPrice - comps.market.minPrice)) * 100))}%`,
+                          transform: 'translateX(-50%)',
+                        }}
+                      />
+                    )}
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-orange-500 font-medium">● This listing</span>
+                    <span className="text-blue-500">| Median: {formatPrice(comps.market.medianPrice)}</span>
+                  </div>
+                </div>
+
+                {/* Stats grid */}
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="bg-muted/50 rounded-lg p-2.5">
+                    <p className="text-xs text-muted-foreground">Median Price</p>
+                    <p className="font-semibold">{formatPrice(comps.market.medianPrice)}</p>
+                  </div>
+                  <div className="bg-muted/50 rounded-lg p-2.5">
+                    <p className="text-xs text-muted-foreground">Avg Price</p>
+                    <p className="font-semibold">{formatPrice(comps.market.avgPrice)}</p>
+                  </div>
+                  <div className="bg-muted/50 rounded-lg p-2.5">
+                    <p className="text-xs text-muted-foreground">Median Mileage</p>
+                    <p className="font-semibold">{formatMileage(comps.market.medianMileage)}</p>
+                  </div>
+                  <div className="bg-muted/50 rounded-lg p-2.5">
+                    <p className="text-xs text-muted-foreground">Mileage vs Peers</p>
+                    <p className={`font-semibold ${
+                      (comps.comparison.mileageDeltaPercent ?? 0) > 0 ? 'text-green-600' :
+                      (comps.comparison.mileageDeltaPercent ?? 0) < -10 ? 'text-red-500' : ''
+                    }`}>
+                      {comps.comparison.mileageDeltaPercent > 0 ? `${comps.comparison.mileageDeltaPercent}% less` :
+                       comps.comparison.mileageDeltaPercent < 0 ? `${Math.abs(comps.comparison.mileageDeltaPercent)}% more` :
+                       'Average'}
+                    </p>
+                  </div>
+                  <div className="bg-muted/50 rounded-lg p-2.5">
+                    <p className="text-xs text-muted-foreground">Price Rank</p>
+                    <p className="font-semibold">
+                      Cheaper than {100 - comps.comparison.pricePercentile}% of comps
+                    </p>
+                  </div>
+                  <div className="bg-muted/50 rounded-lg p-2.5">
+                    <p className="text-xs text-muted-foreground">Comps Found</p>
+                    <p className="font-semibold">{comps.compCount} listings</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {listing.priceHistory.length > 0 && (
             <section className="bg-card rounded-xl ring-1 ring-foreground/10 p-4 flex flex-col gap-3">
               <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">

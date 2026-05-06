@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2, Save, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Loader2, Save, RefreshCw, AlertTriangle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function SettingsPage() {
@@ -222,7 +222,7 @@ export default function SettingsPage() {
               </p>
             </div>
 
-            <div className="pt-4 border-t">
+            <div className="pt-4 border-t space-y-2">
               <Button
                 onClick={handleScan}
                 disabled={triggerScrape.isPending}
@@ -235,6 +235,20 @@ export default function SettingsPage() {
                   <RefreshCw className="h-4 w-4 mr-2" />
                 )}
                 Scan Now
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full text-muted-foreground"
+                onClick={() => {
+                  fetch('/api/scrape/clear', { method: 'POST' })
+                    .then(r => r.json())
+                    .then(d => toast.success(`Cleared ${d.cleared} stuck scan(s)`))
+                    .catch(() => toast.error('Failed to clear'));
+                }}
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-2" />
+                Clear Stuck Scans
               </Button>
             </div>
           </CardContent>

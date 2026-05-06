@@ -92,14 +92,8 @@ export async function runScrape(): Promise<{ runId: number; result: ScrapeResult
       throw new Error('No search config found in DB');
     }
 
-    // MCP scrape
-    console.log(`[runner] Starting MCP scrape (runId=${runId})`);
-    const mcpListings = await searchCarDeals(config);
-    console.log(`[runner] MCP returned ${mcpListings.length} listings`);
-    const mcpResult = await upsertListings(mcpListings, 'mcp');
-    finalResult = mergeScrapeResults(finalResult, mcpResult);
-
-    // Facebook scrape
+    // Facebook scrape (first — faster, separate browser)
+    console.log(`[runner] fbEnabled=${config.fbEnabled}, checking Facebook...`);
     if (config.fbEnabled) {
       console.log(`[runner] Starting Facebook scrape (runId=${runId})`);
       const fbListings = await searchFacebook(config);
@@ -107,6 +101,13 @@ export async function runScrape(): Promise<{ runId: number; result: ScrapeResult
       const fbResult = await upsertListings(fbListings, 'facebook');
       finalResult = mergeScrapeResults(finalResult, fbResult);
     }
+
+    // MCP scrape (Cars.com, Autotrader, KBB)
+    console.log(`[runner] Starting MCP scrape (runId=${runId})`);
+    const mcpListings = await searchCarDeals(config);
+    console.log(`[runner] MCP returned ${mcpListings.length} listings`);
+    const mcpResult = await upsertListings(mcpListings, 'mcp');
+    finalResult = mergeScrapeResults(finalResult, mcpResult);
 
     // Mark completed
     db.update(scrapeRuns)
