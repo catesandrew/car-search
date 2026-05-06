@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+
+# production
+build/
+
+# env files
+.env.local
+.env*.local
+
+# debug
+npm-debug.log*
+
+# misc
+.DS_Store
+*.pem
+
+# database
+data/*.db
+data/*.db-wal
+data/*.db-shm
+
+# omc state
+.omc/state/
+tsconfig.tsbuildinfo
