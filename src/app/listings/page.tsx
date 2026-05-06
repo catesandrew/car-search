@@ -81,15 +81,23 @@ function ListingsContent() {
 
   // Sync filters from URL on mount
   useEffect(() => {
-    const src = searchParams.get('source');
-    const viewStatus = searchParams.get('viewStatus');
-    if (src || viewStatus) {
-      setFilters((prev) => ({
-        ...prev,
-        source: src ?? undefined,
-        viewStatus: viewStatus ?? undefined,
-      }));
-    }
+    const f: ListingFilters = {
+      source: searchParams.get('source') ?? undefined,
+      priceMin: searchParams.get('priceMin') ?? undefined,
+      priceMax: searchParams.get('priceMax') ?? undefined,
+      mileageMin: searchParams.get('mileageMin') ?? undefined,
+      mileageMax: searchParams.get('mileageMax') ?? undefined,
+      yearMin: searchParams.get('yearMin') ?? undefined,
+      yearMax: searchParams.get('yearMax') ?? undefined,
+      scoreMin: searchParams.get('scoreMin') ?? undefined,
+      viewStatus: searchParams.get('viewStatus') ?? undefined,
+      isFavorited: searchParams.get('isFavorited') === 'true' || undefined,
+      showDismissed: searchParams.get('showDismissed') === 'true' || undefined,
+      sortBy: searchParams.get('sortBy') ?? 'first_seen_at',
+      sortDir: (searchParams.get('sortDir') as 'asc' | 'desc') ?? 'desc',
+      page: Number(searchParams.get('page') ?? '1') || 1,
+    };
+    setFilters(f);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -103,12 +111,29 @@ function ListingsContent() {
   const limit = 20;
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
-  const handleFiltersChange = (next: ListingFilters) => {
-    setFilters(next);
+  const syncUrl = (f: ListingFilters) => {
     const url = new URLSearchParams();
-    if (next.source) url.set('source', next.source);
-    if (next.viewStatus) url.set('viewStatus', next.viewStatus);
+    if (f.source) url.set('source', f.source);
+    if (f.priceMin) url.set('priceMin', f.priceMin);
+    if (f.priceMax) url.set('priceMax', f.priceMax);
+    if (f.mileageMin) url.set('mileageMin', f.mileageMin);
+    if (f.mileageMax) url.set('mileageMax', f.mileageMax);
+    if (f.yearMin) url.set('yearMin', f.yearMin);
+    if (f.yearMax) url.set('yearMax', f.yearMax);
+    if (f.scoreMin) url.set('scoreMin', f.scoreMin);
+    if (f.viewStatus) url.set('viewStatus', f.viewStatus);
+    if (f.isFavorited) url.set('isFavorited', 'true');
+    if (f.showDismissed) url.set('showDismissed', 'true');
+    if (f.sortBy && f.sortBy !== 'first_seen_at') url.set('sortBy', f.sortBy);
+    if (f.sortDir && f.sortDir !== 'desc') url.set('sortDir', f.sortDir);
+    if (f.page && f.page > 1) url.set('page', String(f.page));
     router.replace(`/listings?${url.toString()}`, { scroll: false });
+  };
+
+  const handleFiltersChange = (next: ListingFilters) => {
+    const reset = { ...next, page: 1 }; // reset to page 1 on filter change
+    setFilters(reset);
+    syncUrl(reset);
   };
 
   const handleMarkSeen = () => {
@@ -181,7 +206,11 @@ function ListingsContent() {
             variant="outline"
             size="sm"
             disabled={page <= 1}
-            onClick={() => setFilters((f) => ({ ...f, page: page - 1 }))}
+            onClick={() => {
+              const next = { ...filters, page: page - 1 };
+              setFilters(next);
+              syncUrl(next);
+            }}
           >
             <ChevronLeft className="size-4" />
             Previous
@@ -193,7 +222,11 @@ function ListingsContent() {
             variant="outline"
             size="sm"
             disabled={page >= totalPages}
-            onClick={() => setFilters((f) => ({ ...f, page: page + 1 }))}
+            onClick={() => {
+              const next = { ...filters, page: page + 1 };
+              setFilters(next);
+              syncUrl(next);
+            }}
           >
             Next
             <ChevronRight className="size-4" />
