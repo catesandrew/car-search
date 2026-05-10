@@ -28,3 +28,6 @@ data/*.db-shm
 # omc state
 .omc/state/
 tsconfig.tsbuildinfo
+docs/node_modules/
+docs/build/
+docs/.docusaurus/
