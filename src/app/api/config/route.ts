@@ -8,6 +8,7 @@ import type { SearchConfig } from '@/lib/types';
 
 const updateConfigSchema = z.object({
   zip: z.string().optional(),
+  fbLocation: z.string().optional(),
   radiusMiles: z.number().min(10).max(500).optional(),
   priceMax: z.number().min(0).optional(),
   mileageMax: z.number().min(0).optional(),
@@ -38,6 +39,7 @@ export async function PUT(request: NextRequest) {
 
   const updates: Record<string, unknown> = {};
   if (parsed.data.zip !== undefined) updates.zip = parsed.data.zip;
+  if (parsed.data.fbLocation !== undefined) updates.fbLocation = parsed.data.fbLocation;
   if (parsed.data.radiusMiles !== undefined) updates.radiusMiles = parsed.data.radiusMiles;
   if (parsed.data.priceMax !== undefined) updates.priceMax = parsed.data.priceMax;
   if (parsed.data.mileageMax !== undefined) updates.mileageMax = parsed.data.mileageMax;

@@ -71,7 +71,8 @@ export const scrapeRuns = sqliteTable('scrape_runs', {
 
 export const searchConfig = sqliteTable('search_config', {
   id: integer('id').primaryKey().default(1),
-  zip: text('zip').default('92648'),
+  zip: text('zip'),
+  fbLocation: text('fb_location'),
   radiusMiles: integer('radius_miles').default(150),
   priceMax: integer('price_max').default(1500000), // $15,000 in cents
   mileageMax: integer('mileage_max').default(200000),

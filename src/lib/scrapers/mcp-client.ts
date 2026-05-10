@@ -5,19 +5,9 @@ import { normalizeMcpListing } from './normalize';
 
 const TOOL_TIMEOUT_MS = 90_000;
 
-/**
- * Zip codes within ~50 miles of 92646 (Huntington Beach, CA).
- * KBB doesn't support radius natively, so we search multiple zips.
- * Cars.com uses maximum_distance param instead.
- */
-const NEARBY_ZIPS: Record<string, string[]> = {
-  '92646': ['92646', '90802', '92708', '92618', '90247', '91101', '92831'],  // HB, Long Beach, Fountain Valley, Irvine, Gardena, Pasadena, Fullerton
-  '92648': ['92648', '90802', '92708', '92618', '90247', '91101', '92831'],
-};
-
 function getSearchZips(primaryZip: string | null): string[] {
-  const zip = primaryZip ?? '92646';
-  return NEARBY_ZIPS[zip] ?? [zip];
+  if (!primaryZip) return [];
+  return [primaryZip];
 }
 
 interface MakeModel {

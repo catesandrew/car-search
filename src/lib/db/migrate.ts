@@ -36,8 +36,8 @@ export function runCustomMigrations() {
   const configCount = sqlite.prepare('SELECT COUNT(*) as count FROM search_config').get() as { count: number };
   if (configCount.count === 0) {
     sqlite.prepare(`
-      INSERT INTO search_config (id, zip, radius_miles, price_max, mileage_max, year_min, year_max, makes_models, cron_interval, fb_enabled)
-      VALUES (1, '92648', 150, 1500000, 200000, 2005, 2025, '["Toyota Tacoma","Toyota 4Runner"]', 30, 0)
+      INSERT INTO search_config (id, zip, fb_location, radius_miles, price_max, mileage_max, year_min, year_max, makes_models, cron_interval, fb_enabled)
+      VALUES (1, NULL, NULL, 150, 1500000, 200000, 2005, 2025, '[]', 30, 0)
     `).run();
   }
 

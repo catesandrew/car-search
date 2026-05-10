@@ -7,7 +7,7 @@ import type { NewListing, ScrapeResult, Listing, SearchConfig } from '../types';
 function getConfigForScoring(): SearchConfig {
   const row = db.select().from(searchConfig).limit(1).get();
   if (!row) return {
-    id: 1, zip: '92646', radiusMiles: 150, priceMax: 1500000,
+    id: 1, zip: null, fbLocation: null, radiusMiles: 150, priceMax: 1500000,
     mileageMax: 200000, yearMin: 2005, yearMax: 2025,
     makesModels: null, cronInterval: 30, fbEnabled: false, lastViewedAt: null,
   };

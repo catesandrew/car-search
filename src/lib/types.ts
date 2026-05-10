@@ -49,6 +49,7 @@ export interface NoteEntry {
 export interface SearchConfig {
   id: number;
   zip: string | null;
+  fbLocation: string | null;
   radiusMiles: number | null;
   priceMax: number | null; // cents
   mileageMax: number | null;

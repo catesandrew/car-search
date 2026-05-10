@@ -19,6 +19,7 @@ export default function SettingsPage() {
   const triggerScrape = useTriggerScrape();
 
   const [zip, setZip] = useState('');
+  const [fbLocation, setFbLocation] = useState('');
   const [radiusMiles, setRadiusMiles] = useState('');
   const [priceMax, setPriceMax] = useState('');
   const [mileageMax, setMileageMax] = useState('');
@@ -30,7 +31,8 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (config) {
-      setZip(config.zip ?? '92648');
+      setZip(config.zip ?? '');
+      setFbLocation(config.fbLocation ?? '');
       setRadiusMiles(String(config.radiusMiles ?? 150));
       setPriceMax(String((config.priceMax ?? 1500000) / 100));
       setMileageMax(String(config.mileageMax ?? 200000));
@@ -50,6 +52,7 @@ export default function SettingsPage() {
     updateConfig.mutate(
       {
         zip,
+        fbLocation,
         radiusMiles: Number(radiusMiles),
         priceMax: Math.round(Number(priceMax) * 100),
         mileageMax: Number(mileageMax),
@@ -109,7 +112,7 @@ export default function SettingsPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium">ZIP Code</label>
-                <Input value={zip} onChange={(e) => setZip(e.target.value)} placeholder="92648" />
+                <Input value={zip} onChange={(e) => setZip(e.target.value)} placeholder="e.g. 90210" />
               </div>
               <div>
                 <label className="text-sm font-medium">Radius (miles)</label>
@@ -290,6 +293,17 @@ export default function SettingsPage() {
                 </p>
               </div>
             )}
+            <div>
+              <label className="text-sm font-medium">FB Location (city slug)</label>
+              <Input
+                value={fbLocation}
+                onChange={(e) => setFbLocation(e.target.value)}
+                placeholder="e.g. losangeles, chicago, newyork"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                City name used for Facebook Marketplace searches (no spaces, lowercase).
+              </p>
+            </div>
             <p className="text-xs text-muted-foreground">
               Configure FB_EMAIL and FB_PASSWORD in your .env.local file.
             </p>

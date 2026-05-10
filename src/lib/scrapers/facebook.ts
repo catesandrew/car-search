@@ -31,8 +31,8 @@ export async function searchFacebook(config: SearchConfig): Promise<NewListing[]
     scriptPath,
     '--email', fbEmail,
     '--password', fbPassword,
-    '--location', 'huntingtonbeach',
-    '--radius', '80',
+    '--location', config.fbLocation ?? config.zip ?? '',
+    '--radius', String(config.radiusMiles ?? 50),
   ];
 
   if (config.priceMax != null) {
@@ -55,7 +55,7 @@ export async function searchFacebook(config: SearchConfig): Promise<NewListing[]
   return new Promise((resolve) => {
     console.log('[facebook] Starting FB Marketplace scrape...');
     execFile(
-      process.env.PYTHON_PATH ?? '/opt/homebrew/bin/python3.12',
+      process.env.PYTHON_PATH ?? 'python3',
       args,
       {
         timeout: FB_SCRIPT_TIMEOUT_MS,
