@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "car_search",
+  "project_id": "d22e90b7-144b-4936-88cd-ebd80d9891c4"
+}

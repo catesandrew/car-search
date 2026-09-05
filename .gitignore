@@ -31,3 +31,9 @@ tsconfig.tsbuildinfo
 docs/node_modules/
 docs/build/
 docs/.docusaurus/
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
+.beads/proxieddb/
