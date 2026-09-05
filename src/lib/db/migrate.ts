@@ -32,6 +32,12 @@ export function runCustomMigrations() {
     ON listings(source, external_id) WHERE external_id IS NOT NULL;
   `);
 
+  // Add fb_location column if it doesn't exist (added after initial schema)
+  const columns = sqlite.prepare("PRAGMA table_info(search_config)").all() as { name: string }[];
+  if (!columns.some(c => c.name === 'fb_location')) {
+    sqlite.exec(`ALTER TABLE search_config ADD COLUMN fb_location TEXT;`);
+  }
+
   // Seed default search_config if empty
   const configCount = sqlite.prepare('SELECT COUNT(*) as count FROM search_config').get() as { count: number };
   if (configCount.count === 0) {
