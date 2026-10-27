@@ -1,5 +1,7 @@
 # Car Search Dashboard
 
+**Tags:** `web` `mcp`
+
 A Next.js dashboard that automatically scrapes Toyota truck listings from KBB, Autotrader, and Facebook Marketplace, scores deals against market comparables, and lets you favorite, annotate, and track price changes.
 
 Built to help find a used Toyota Tacoma, 4Runner, or Tundra under $15k near Huntington Beach, CA.
